@@ -1,4 +1,4 @@
-use crate::geometry::{Rectangle, Point};
+use crate::geometry::{Point, Rectangle};
 
 pub enum PlayerState {
   Standing,
@@ -20,10 +20,7 @@ impl Player {
   pub fn new() -> Player {
     Player {
       body: Rectangle {
-        tl: Point {
-          x: 300.,
-          y: 100.,
-        },
+        tl: Point { x: 300., y: 100. },
         width: 50.,
         height: 50.,
       },
@@ -43,6 +40,6 @@ impl Player {
       },
       width: self.body.width,
       height: 5.,
-    } 
+    }
   }
 }

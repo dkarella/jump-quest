@@ -1,51 +1,51 @@
 #[macro_use]
 extern crate stdweb;
 
-mod game;
-mod io;
-mod screen;
-mod models;
+
 mod controllers;
 mod draw;
+mod game;
 mod geometry;
+mod inputs;
+mod models;
+mod screen;
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use stdweb::web::{event::KeyDownEvent, event::KeyUpEvent, IEventTarget};
-use stdweb::traits::*;
 
 use game::Game;
-use io::Io;
+use inputs::Inputs;
 use screen::Screen;
-
+use stdweb::traits::*;
+use stdweb::web::{event::KeyDownEvent, event::KeyUpEvent, IEventTarget};
 const CANVAS_ELEMENT_ID: &str = "#canvas";
 const SCREEN_WIDTH: f64 = 1024.;
 const SCREEN_HEIGHT: f64 = 576.;
 
 pub fn start() {
   let game = Game::new();
-  let io = Rc::new(RefCell::new(Io::new()));
+  let inputs = Rc::new(RefCell::new(Inputs::new()));
   let screen = Screen::new(CANVAS_ELEMENT_ID, SCREEN_WIDTH, SCREEN_HEIGHT);
-  
+
   stdweb::web::document().add_event_listener({
-    let io = io.clone();
+    let inputs = inputs.clone();
     move |event: KeyDownEvent| {
-      io.borrow_mut().keys_pressed.insert(event.key().clone());
+      inputs.borrow_mut().keys_pressed.insert(event.key().clone());
     }
   });
 
   stdweb::web::document().add_event_listener({
-    let io = io.clone();
+    let inputs = inputs.clone();
     move |event: KeyUpEvent| {
-      io.borrow_mut().keys_pressed.remove(&event.key());
+      inputs.borrow_mut().keys_pressed.remove(&event.key());
     }
   });
 
-  game_loop(game, io, screen);
+  game_loop(game, inputs, screen);
 }
 
-fn game_loop(mut game: Game, io:Rc<RefCell<Io>>, screen: Screen) {
+fn game_loop(mut game: Game, io: Rc<RefCell<Inputs>>, screen: Screen) {
   let mut old_time = 0.;
   let callback = move |time: f64| {
     game.update(&io.borrow());
@@ -54,7 +54,11 @@ fn game_loop(mut game: Game, io:Rc<RefCell<Io>>, screen: Screen) {
     // draw fps counter
     screen.set_font("14px Arial");
     screen.set_fill_style_color("black");
-    screen.fill_text(&format!("FPS: {:.2}", 1. / ((time - old_time) / 1000.)), 10., 20.);
+    screen.fill_text(
+      &format!("FPS: {:.2}", 1. / ((time - old_time) / 1000.)),
+      10.,
+      20.,
+    );
     old_time = time;
   };
 
@@ -67,5 +71,5 @@ fn game_loop(mut game: Game, io:Rc<RefCell<Io>>, screen: Screen) {
     }
 
     requestAnimationFrame(loop);
-  } 
+  }
 }

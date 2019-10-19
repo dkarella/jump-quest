@@ -23,7 +23,6 @@ impl Rectangle {
       (&other, &self)
     };
 
-    right.tl.x <= left.tl.x + left.width
-    && top.tl.y + top.height >= bottom.tl.y
+    right.tl.x <= left.tl.x + left.width && top.tl.y + top.height >= bottom.tl.y
   }
 }

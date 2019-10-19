@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
-pub struct Io {
+pub struct Inputs {
   pub keys_pressed: HashSet<String>,
 }
 
-impl Io {
-  pub fn new() -> Io {
-    Io {
+impl Inputs {
+  pub fn new() -> Inputs {
+    Inputs {
       keys_pressed: HashSet::new(),
     }
   }

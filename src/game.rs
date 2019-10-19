@@ -1,9 +1,10 @@
-use crate::io::Io;
-use crate::screen::Screen;
-use crate::models::player::Player;
-use crate::models::tiles::{Tile, TILE_SIZE};
 use crate::controllers;
 use crate::draw;
+
+use crate::inputs::Inputs;
+use crate::models::player::Player;
+use crate::models::tiles::{Tile, TILE_SIZE};
+use crate::screen::Screen;
 
 pub struct World {
   pub player: Player,
@@ -15,16 +16,16 @@ impl World {
     World {
       player: Player::new(),
       tiles: vec![
-        Tile::new(TILE_SIZE * 0., 400.),  
-        Tile::new(TILE_SIZE * 1., 400.),  
-        Tile::new(TILE_SIZE * 2., 400.),  
-        Tile::new(TILE_SIZE * 3., 400.),  
-        Tile::new(TILE_SIZE * 4., 400.),  
+        Tile::new(TILE_SIZE * 0., 400.),
+        Tile::new(TILE_SIZE * 1., 400.),
+        Tile::new(TILE_SIZE * 2., 400.),
+        Tile::new(TILE_SIZE * 3., 400.),
+        Tile::new(TILE_SIZE * 4., 400.),
         Tile::new(TILE_SIZE * 5., 400.),
-        Tile::new(TILE_SIZE * 6., 400.),  
-        Tile::new(TILE_SIZE * 7., 400.),  
-        Tile::new(TILE_SIZE * 8., 400.),  
-        Tile::new(TILE_SIZE * 9., 400.),  
+        Tile::new(TILE_SIZE * 6., 400.),
+        Tile::new(TILE_SIZE * 7., 400.),
+        Tile::new(TILE_SIZE * 8., 400.),
+        Tile::new(TILE_SIZE * 9., 400.),
         Tile::new(TILE_SIZE * 7., 315.),
         Tile::new(TILE_SIZE * 8., 315.),
         Tile::new(TILE_SIZE * 9., 315.),
@@ -47,9 +48,9 @@ impl Game {
     }
   }
 
-  pub fn update(&mut self, io: &Io) {
-    controllers::handle_player_input(&mut self.world, io);
- }
+  pub fn update(&mut self, inputs: &Inputs) {
+    controllers::handle_player_input(&mut self.world, inputs);
+  }
 
   pub fn draw(&self, screen: &Screen) {
     draw::clear(screen);

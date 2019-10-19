@@ -1,4 +1,4 @@
-use crate::geometry::{Rectangle, Point};
+use crate::geometry::{Point, Rectangle};
 
 pub const TILE_SIZE: f64 = 50.;
 
@@ -13,7 +13,7 @@ impl Tile {
         tl: Point { x, y },
         width: TILE_SIZE,
         height: TILE_SIZE,
-      }
+      },
     }
   }
 
