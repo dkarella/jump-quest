@@ -1,13 +1,9 @@
 
+use crate::constants::*;
 use crate::game::World;
 use crate::inputs::Inputs;
 use crate::models::player::PlayerState;
 use std::collections::HashSet;
-
-const GRAVITY: f64 = 0.5;
-const FALL_SPEED: f64 = 11.;
-const WALK_SPEED: f64 = 2.;
-const JUMPING_MOVE_ACCELERATION: f64 = 0.05;
 
 pub fn handle_inputs(world: &mut World, inputs: &Inputs, prev_keys_pressed: &HashSet<String>) {
   let Inputs { keys_pressed } = inputs;

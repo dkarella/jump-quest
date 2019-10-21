@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate stdweb;
 
-
+mod constants;
 mod controllers;
 mod draw;
 mod game;

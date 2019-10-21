@@ -1,3 +1,4 @@
+use crate::constants::GRAVITY;
 use crate::geometry::{Point, Rectangle};
 
 #[derive(PartialEq)]
@@ -31,7 +32,7 @@ impl Player {
       state: PlayerState::Jumping {
         a_x: 0.,
         v_x: 0.,
-        a_y: 0.5,
+        a_y: GRAVITY,
         v_y: 0.,
       },
     }
@@ -44,7 +45,7 @@ impl Player {
         y: self.body.tl.y + self.body.height,
       },
       width: self.body.width - 10.,
-      height: 3.,
+      height: 4.,
     }
   }
 }
