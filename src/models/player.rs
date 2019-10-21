@@ -1,18 +1,22 @@
 use crate::geometry::{Point, Rectangle};
 
+#[derive(PartialEq)]
 pub enum PlayerState {
   Standing,
-  Walking,
-  Jumping,
-  Climbing,
+  Walking {
+    a: f64,
+    v: f64,
+  },
+  Jumping {
+    a_x: f64,
+    v_x: f64,
+    a_y: f64,
+    v_y: f64,
+  },
 }
 
 pub struct Player {
   pub body: Rectangle,
-  pub v_x: f64,
-  pub v_y: f64,
-  pub a_x: f64,
-  pub a_y: f64,
   pub state: PlayerState,
 }
 
@@ -24,22 +28,23 @@ impl Player {
         width: 50.,
         height: 50.,
       },
-      v_x: 0.,
-      v_y: 0.,
-      a_x: 0.,
-      a_y: 0.,
-      state: PlayerState::Jumping,
+      state: PlayerState::Jumping {
+        a_x: 0.,
+        v_x: 0.,
+        a_y: 0.5,
+        v_y: 0.,
+      },
     }
   }
 
   pub fn bottom_sensor(&self) -> Rectangle {
     Rectangle {
       tl: Point {
-        x: self.body.tl.x,
+        x: self.body.tl.x + 5.,
         y: self.body.tl.y + self.body.height,
       },
-      width: self.body.width,
-      height: 5.,
+      width: self.body.width - 10.,
+      height: 3.,
     }
   }
 }

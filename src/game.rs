@@ -5,6 +5,7 @@ use crate::inputs::Inputs;
 use crate::models::player::Player;
 use crate::models::tiles::{Tile, TILE_SIZE};
 use crate::screen::Screen;
+use std::collections::HashSet;
 
 pub struct World {
   pub player: Player,
@@ -38,18 +39,22 @@ impl World {
 }
 
 pub struct Game {
-  pub world: World,
+  world: World,
+  prev_keys_pressed: HashSet<String>,
 }
 
 impl Game {
   pub fn new() -> Game {
     Game {
       world: World::new(),
+      prev_keys_pressed: HashSet::new(),
     }
   }
 
   pub fn update(&mut self, inputs: &Inputs) {
-    controllers::handle_player_input(&mut self.world, inputs);
+    controllers::handle_inputs(&mut self.world, inputs, &self.prev_keys_pressed);
+    controllers::update_player(&mut self.world);
+    self.prev_keys_pressed = inputs.keys_pressed.iter().cloned().collect();
   }
 
   pub fn draw(&self, screen: &Screen) {
