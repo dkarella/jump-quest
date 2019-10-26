@@ -1,19 +1,10 @@
-use crate::constants::GRAVITY;
 use crate::geometry::{Point, Rectangle};
 
 #[derive(PartialEq)]
 pub enum PlayerState {
   Standing,
-  Walking {
-    a: f64,
-    v: f64,
-  },
-  Jumping {
-    a_x: f64,
-    v_x: f64,
-    a_y: f64,
-    v_y: f64,
-  },
+  Walking { v: f64 },
+  Jumping { v_x: f64, v_y: f64 },
 }
 
 pub struct Player {
@@ -29,12 +20,7 @@ impl Player {
         width: 50.,
         height: 50.,
       },
-      state: PlayerState::Jumping {
-        a_x: 0.,
-        v_x: 0.,
-        a_y: GRAVITY,
-        v_y: 0.,
-      },
+      state: PlayerState::Jumping { v_x: 0., v_y: 0. },
     }
   }
 

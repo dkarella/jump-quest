@@ -1,7 +1,7 @@
 use crate::controllers;
 use crate::draw;
 
-use crate::inputs::Inputs;
+use crate::inputs::{Inputs, Key};
 use crate::models::player::Player;
 use crate::models::tiles::{Tile, TILE_SIZE};
 use crate::screen::Screen;
@@ -40,7 +40,7 @@ impl World {
 
 pub struct Game {
   world: World,
-  prev_keys_pressed: HashSet<String>,
+  prev_keys_pressed: HashSet<Key>,
 }
 
 impl Game {
@@ -52,9 +52,19 @@ impl Game {
   }
 
   pub fn update(&mut self, inputs: &Inputs) {
-    controllers::handle_inputs(&mut self.world, inputs, &self.prev_keys_pressed);
-    controllers::update_player(&mut self.world);
-    self.prev_keys_pressed = inputs.keys_pressed.iter().cloned().collect();
+    let keys_pressed: HashSet<Key> = inputs.keys_pressed();
+    let keys_unpressed: HashSet<Key> = self
+      .prev_keys_pressed
+      .difference(&keys_pressed)
+      .cloned()
+      .collect();
+
+    let commands =
+      controllers::handle_inputs(&mut self.world, keys_pressed.iter(), keys_unpressed.iter());
+
+    controllers::update_player(&mut self.world, commands);
+
+    self.prev_keys_pressed = keys_pressed;
   }
 
   pub fn draw(&self, screen: &Screen) {

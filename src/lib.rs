@@ -3,6 +3,7 @@ extern crate stdweb;
 
 mod constants;
 mod controllers;
+mod commands;
 mod draw;
 mod game;
 mod geometry;
@@ -31,14 +32,14 @@ pub fn start() {
   stdweb::web::document().add_event_listener({
     let inputs = inputs.clone();
     move |event: KeyDownEvent| {
-      inputs.borrow_mut().keys_pressed.insert(event.key().clone());
+      inputs.borrow_mut().set_key_pressed(&event.key());
     }
   });
 
   stdweb::web::document().add_event_listener({
     let inputs = inputs.clone();
     move |event: KeyUpEvent| {
-      inputs.borrow_mut().keys_pressed.remove(&event.key());
+      inputs.borrow_mut().unset_key_pressed(&event.key());
     }
   });
 

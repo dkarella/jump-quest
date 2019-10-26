@@ -1,72 +1,24 @@
-
+use crate::commands::Command;
 use crate::constants::*;
 use crate::game::World;
-use crate::inputs::Inputs;
+use crate::inputs::Key;
 use crate::models::player::PlayerState;
-use std::collections::HashSet;
 
-pub fn handle_inputs(world: &mut World, inputs: &Inputs, prev_keys_pressed: &HashSet<String>) {
-  let Inputs { keys_pressed } = inputs;
+pub fn handle_inputs<'a, I>(world: &World, keys_pressed: I, keys_unpressed: I) -> Vec<Command>
+where
+  I: Iterator<Item = &'a Key>,
+{
   let World { player, .. } = world;
-  let keys_pressed: HashSet<String> = keys_pressed.iter().cloned().collect();
-  let keys_unpressed = prev_keys_pressed.difference(&keys_pressed);
+  let mut commands = Vec::new();
 
-  for key in keys_pressed.iter() {
-    match key.as_str() {
-      "ArrowLeft" | "ArrowRight" => match player.state {
-        PlayerState::Jumping { v_x, a_y, v_y, .. } => {
-          player.state = PlayerState::Jumping {
-            a_x: if key.as_str() == "ArrowRight" {
-              JUMPING_MOVE_ACCELERATION
-            } else {
-              -1. * JUMPING_MOVE_ACCELERATION
-            },
-            a_y,
-            v_y,
-            v_x,
-          };
+  for key in keys_pressed {
+    match key {
+      &Key::ArrowLeft => commands.push(Command::MoveLeft),
+      &Key::ArrowRight => commands.push(Command::MoveRight),
+      Key::Space => match player.state {
+        PlayerState::Walking { .. } | PlayerState::Standing => {
+          commands.push(Command::Jump);
         }
-
-        PlayerState::Walking { v, .. } => {
-          let a = if key.as_str() == "ArrowRight" {
-            WALK_SPEED
-          } else {
-            -1. * WALK_SPEED
-          };
-
-          player.state = PlayerState::Walking { a, v };
-        }
-
-        PlayerState::Standing => {
-          let a = if key.as_str() == "ArrowRight" {
-            WALK_SPEED
-          } else {
-            -1. * WALK_SPEED
-          };
-
-          player.state = PlayerState::Walking { a, v: 0. };
-        }
-      },
-
-      " " => match player.state {
-        PlayerState::Walking { a, v } => {
-          player.state = PlayerState::Jumping {
-            a_x: a,
-            v_x: v,
-            a_y: GRAVITY,
-            v_y: -9.25,
-          };
-        }
-
-        PlayerState::Standing => {
-          player.state = PlayerState::Jumping {
-            a_x: 0.,
-            v_x: 0.,
-            a_y: GRAVITY,
-            v_y: -9.25,
-          };
-        }
-
         _ => (),
       },
       _ => (),
@@ -74,31 +26,75 @@ pub fn handle_inputs(world: &mut World, inputs: &Inputs, prev_keys_pressed: &Has
   }
 
   for key in keys_unpressed {
-    match key.as_str() {
-      "ArrowLeft" | "ArrowRight" => match player.state {
+    match key {
+      Key::ArrowLeft | Key::ArrowRight => match player.state {
         PlayerState::Walking { .. } => {
-          player.state = PlayerState::Standing;
-        }
-        PlayerState::Jumping { v_x, a_y, v_y, .. } => {
-          player.state = PlayerState::Jumping {
-            a_x: 0.,
-            v_x,
-            a_y,
-            v_y,
-          };
+          commands.push(Command::Stand);
         }
         _ => (),
       },
       _ => (),
     }
   }
+
+  commands
 }
 
-pub fn update_player(world: &mut World) {
+pub fn update_player(world: &mut World, mut commands: Vec<Command>) {
   let World { player, tiles } = world;
 
+  commands.sort();
+  commands.iter().for_each(|command| match command {
+    &Command::Stand => {
+      player.state = match player.state {
+        PlayerState::Standing => PlayerState::Standing,
+        PlayerState::Walking { .. } => PlayerState::Standing,
+        PlayerState::Jumping { v_y, v_x } => PlayerState::Jumping { v_x, v_y },
+      };
+    }
+    &Command::Jump => {
+      player.state = match player.state {
+        PlayerState::Walking { v } => PlayerState::Jumping {
+          v_x: v,
+          v_y: JUMP_FORCE,
+        },
+        PlayerState::Standing => PlayerState::Jumping {
+          v_x: 0.,
+          v_y: JUMP_FORCE,
+        },
+        PlayerState::Jumping { v_x, v_y } => PlayerState::Jumping { v_x, v_y },
+      };
+    }
+    &Command::MoveLeft => {
+      player.state = match player.state {
+        PlayerState::Jumping { v_x, v_y } => PlayerState::Jumping {
+          v_x: (v_x - JUMPING_MOVE_ACCELERATION).max(-1. * WALK_SPEED),
+          v_y,
+        },
+        PlayerState::Walking { v } => PlayerState::Walking {
+          v: (v - WALK_SPEED).max(-1. * WALK_SPEED),
+        },
+        PlayerState::Standing => PlayerState::Walking {
+          v: -1. * WALK_SPEED,
+        },
+      }
+    }
+    &Command::MoveRight => {
+      player.state = match player.state {
+        PlayerState::Jumping { v_x, v_y } => PlayerState::Jumping {
+          v_x: (v_x + JUMPING_MOVE_ACCELERATION).min(WALK_SPEED),
+          v_y,
+        },
+        PlayerState::Walking { v } => PlayerState::Walking {
+          v: (v + WALK_SPEED).min(WALK_SPEED),
+        },
+        PlayerState::Standing => PlayerState::Walking { v: WALK_SPEED },
+      }
+    }
+  });
+
   match player.state {
-    PlayerState::Jumping { a_y, v_y, a_x, v_x } => {
+    PlayerState::Jumping { v_y, v_x } => {
       let tile = tiles
         .iter()
         .find(|tile| player.bottom_sensor().intersects(&tile.landing_sensor()));
@@ -114,41 +110,31 @@ pub fn update_player(world: &mut World) {
           player.body.tl.y += v_y;
 
           player.state = PlayerState::Jumping {
-            a_y,
-            a_x,
-            v_x: match v_x + a_x {
-              v_x if v_x >= 0. => v_x.min(WALK_SPEED),
-              v_x => v_x.max(-1. * WALK_SPEED),
-            },
-            v_y: (v_y + a_y).min(FALL_SPEED),
+            v_x,
+            v_y: (v_y + GRAVITY).min(FALL_SPEED),
           };
         }
       }
     }
 
-    PlayerState::Walking { a, v } => {
+    PlayerState::Walking { v } => {
       if tiles
         .iter()
         .any(|tile| player.bottom_sensor().intersects(&tile.landing_sensor()))
       {
         player.body.tl.x += v;
-        player.state = PlayerState::Walking {
-          a,
-          v: match a + v {
-            a if a >= 0. => a.min(WALK_SPEED),
-            a => a.max(-1. * WALK_SPEED),
-          },
-        }
       } else {
-        player.state = PlayerState::Jumping {
-          a_x: 0.,
-          v_x: v,
-          a_y: GRAVITY,
-          v_y: 0.,
-        };
+        player.state = PlayerState::Jumping { v_x: v, v_y: 0. };
       }
     }
 
-    PlayerState::Standing => (),
+    PlayerState::Standing => {
+      if !tiles
+        .iter()
+        .any(|tile| player.bottom_sensor().intersects(&tile.landing_sensor()))
+      {
+        player.state = PlayerState::Jumping { v_x: 0., v_y: 0. };
+      }
+    }
   }
 }
