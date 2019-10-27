@@ -2,7 +2,7 @@ use crate::commands::Command;
 use crate::constants::*;
 use crate::game::World;
 use crate::inputs::Key;
-use crate::models::player::PlayerState;
+use crate::player::PlayerState;
 
 pub fn handle_inputs<'a, I>(world: &World, keys_pressed: I, keys_unpressed: I) -> Vec<Command>
 where

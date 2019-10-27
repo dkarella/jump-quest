@@ -1,25 +1,27 @@
 #[macro_use]
 extern crate stdweb;
 
+mod commands;
+
 mod constants;
 mod controllers;
-mod commands;
 mod draw;
 mod game;
 mod geometry;
 mod inputs;
-mod models;
+mod player;
 mod screen;
-
-use std::cell::RefCell;
-use std::rc::Rc;
+mod tiles;
 
 
 use game::Game;
 use inputs::Inputs;
 use screen::Screen;
+use std::cell::RefCell;
+use std::rc::Rc;
 use stdweb::traits::*;
 use stdweb::web::{event::KeyDownEvent, event::KeyUpEvent, IEventTarget};
+
 const CANVAS_ELEMENT_ID: &str = "#canvas";
 const SCREEN_WIDTH: f64 = 1024.;
 const SCREEN_HEIGHT: f64 = 576.;
@@ -46,10 +48,10 @@ pub fn start() {
   game_loop(game, inputs, screen);
 }
 
-fn game_loop(mut game: Game, io: Rc<RefCell<Inputs>>, screen: Screen) {
+fn game_loop(mut game: Game, inputs: Rc<RefCell<Inputs>>, screen: Screen) {
   let mut old_time = 0.;
   let callback = move |time: f64| {
-    game.update(&io.borrow());
+    game.update(&inputs.borrow());
     game.draw(&screen);
 
     // draw fps counter

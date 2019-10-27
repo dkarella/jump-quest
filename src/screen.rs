@@ -1,8 +1,8 @@
-
 use stdweb::traits::*;
 use stdweb::unstable::TryInto;
 use stdweb::web::html_element::CanvasElement;
 use stdweb::web::{document, CanvasRenderingContext2d};
+
 pub struct Screen {
   canvas: CanvasElement,
   ctx: CanvasRenderingContext2d,

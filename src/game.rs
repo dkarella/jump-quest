@@ -1,10 +1,9 @@
 use crate::controllers;
 use crate::draw;
-
 use crate::inputs::{Inputs, Key};
-use crate::models::player::Player;
-use crate::models::tiles::{Tile, TILE_SIZE};
+use crate::player::Player;
 use crate::screen::Screen;
+use crate::tiles::{Tile, TILE_SIZE};
 use std::collections::HashSet;
 
 pub struct World {

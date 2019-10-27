@@ -1,8 +1,7 @@
 use crate::geometry::Rectangle;
-
-use crate::models::player::Player;
-use crate::models::tiles::Tile;
+use crate::player::Player;
 use crate::screen::Screen;
+use crate::tiles::Tile;
 
 pub fn clear(screen: &Screen) {
   screen.set_fill_style_color("white");
